@@ -295,7 +295,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({ onRegionSelect }) => {
   };
 
   return (
-    <div className={styles.regionSelector}>
+    <div className={styles.regionSelector} onClick={(e) => e.stopPropagation()}>
       {!drillMode && (
         <div className={styles.section}>
           <div className={styles.titleRow}>
@@ -305,6 +305,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({ onRegionSelect }) => {
           <div className={styles.sidoGrid}>
             {sidoList.map((sido) => (
               <button
+                type="button"
                 key={sido}
                 className={`${styles.regionButton} ${
                   selectedSido === sido ? styles.selected : ""
@@ -323,6 +324,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({ onRegionSelect }) => {
           <div className={styles.titleRow}>
             <h2 className={styles.sectionTitle}>2. 구/군 선택</h2>
             <button
+              type="button"
               className={styles.backButton}
               onClick={(e) => {
                 e.preventDefault();
@@ -340,6 +342,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({ onRegionSelect }) => {
             {sigunguMap[selectedSido].map((sigungu) => (
               <button
                 key={sigungu}
+                type="button"
                 className={`${styles.regionButton} ${
                   selectedSigungu === sigungu ? styles.selected : ""
                 }`}

@@ -3,14 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { User } from "@/shared/types/user";
+import { useRouter } from "next/navigation";
+import { deleteCookie } from "@/shared/lib/cookie.client";
+import { logout as logoutApi } from "@/features/auth/services/auth.service";
 
 interface UserDropdownProps {
-  currentUser: CurrentUser;
+  currentUser: User;
 }
 
 export default function UserDropdown({ currentUser }: UserDropdownProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  // const { logout } = useAuth();
 
   // 바깥 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -27,6 +33,22 @@ export default function UserDropdown({ currentUser }: UserDropdownProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      // 1️⃣ 서버 로그아웃 (실패해도 진행)
+      await logoutApi();
+    } catch (e) {
+      console.error("서버 로그아웃 실패:", e);
+    } finally {
+      // 2️⃣ 클라이언트 인증 정보 제거
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      deleteCookie("accessToken");
+
+      // 3️⃣ 로그인 페이지로 이동 (히스토리 제거)
+      router.replace("/login");
+    }
+  };
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -62,10 +84,7 @@ export default function UserDropdown({ currentUser }: UserDropdownProps) {
           <li className="border-t border-gray-100">
             <button
               className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-200 flex items-center gap-3"
-              onClick={() => {
-                // TODO: 로그아웃 처리 함수 호출
-                console.log("로그아웃");
-              }}
+              onClick={handleLogout}
             >
               <span className="text-red-500">🚪</span>
               로그아웃

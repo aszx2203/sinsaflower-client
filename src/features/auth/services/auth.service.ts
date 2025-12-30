@@ -10,6 +10,14 @@ export async function login(loginId: string, password: string) {
   });
 }
 
+// 로그아웃
+export async function logout() {
+  return clientRequest({
+    url: "/api/auth/logout",
+    method: "POST",
+  });
+}
+
 // 회원가입
 export async function signup(inputs: RegisterFormInputs) {
   const { bankCertFile, businessCertFile, ...rest } = inputs;

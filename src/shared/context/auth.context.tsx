@@ -9,6 +9,7 @@ import React, {
   useCallback,
 } from "react";
 import { login as loginService } from "@/features/auth/services/auth.service";
+// import { logout as logoutService } from "@/features/auth/services/auth.service";
 import { User } from "../types/user";
 import { deleteCookie, setCookie } from "../lib/cookie.client";
 

@@ -236,7 +236,7 @@ export default function DeliveryFields({
               >
                 {MINUTES.map((m) => (
                   <option key={m} value={m}>
-                    {String(m).padStart(2, "0")}분
+                    {m}분
                   </option>
                 ))}
               </select>

@@ -10,12 +10,80 @@ import MessageFields from "../fields/MessageFields";
 import AdditionalInfoFields from "../fields/AdditionalInfoFields";
 import { OrderFormValue } from "../../types/orderFormValue";
 import MemberSearchModal from "@/features/members/components/MemberSearchModal";
+import { clientRequest } from "@/shared/lib/http/client";
 
 interface OrderFormProps {
   mode?: "create" | "view";
   initialData?: Partial<OrderFormValue>;
   orderNumber?: string;
   focusSection?: "consignee" | "top";
+}
+
+function toOrderCreateRequest(form: OrderFormValue) {
+  return {
+    orderType: form.orderType,
+
+    // 상점
+    shopName: form.shopName,
+    phone: form.phone,
+
+    // 상품
+    productName: form.productName,
+    productDetail: form.productDetail,
+    quantity: form.quantity,
+    originPrice: form.originPrice,
+    price: form.price,
+    payment: form.payment,
+
+    // ⭐ 주문자 (필수)
+    orderCustomerName: form.orderCustomerName,
+    orderCustomerPhone: form.orderCustomerPhone,
+    orderCustomerMobile: form.orderCustomerMobile,
+
+    // ⭐ 수령자 (필수)
+    receiverName: form.receiverName,
+    receiverPhone: form.receiverPhone,
+    receiverMobile: form.receiverMobile,
+
+    // 배송
+    deliveryDate: form.deliveryDate,
+    deliveryHours: form.deliveryHours,
+    deliveryMinutes: form.deliveryMinutes,
+    deliveryType: form.deliveryType,
+    deliveryPlace: form.deliveryPlace,
+
+    // 기타
+    card: form.card,
+    request: form.request,
+    hideDeliveryPhoto: form.hideDeliveryPhoto,
+
+    // 옵션
+    options: Object.entries(form.options || {})
+      .filter(([_, v]) => v.checked)
+      .map(([name, v]) => ({
+        optionName: name,
+        checked: v.checked,
+        price: v.price,
+      })),
+
+    // 메시지
+    messages: (form.messages || [])
+      .filter((m) => m?.text)
+      .map((m, idx) => ({
+        text: m.text,
+        sortOrder: idx,
+      })),
+
+    // 발송자
+    senders: (form.senderList || [])
+      .filter((s) => s?.name)
+      .map((s, idx) => ({
+        name: s.name,
+        phone: s.phone,
+        sortOrder: idx,
+        isMain: idx === 0,
+      })),
+  };
 }
 
 const OrderForm = ({
@@ -67,8 +135,21 @@ const OrderForm = ({
     }
   }, [searchParams, setValue]);
 
+  async function createOrder(payload: OrderFormValue) {
+    return clientRequest({
+      url: "/api/orders",
+      method: "POST",
+      data: payload,
+    });
+  }
+
   const handleSelectMember = useCallback(
-    (shop: { shopId?: string; shopName: string; region: string; phone?: string }) => {
+    (shop: {
+      shopId?: string;
+      shopName: string;
+      region: string;
+      phone?: string;
+    }) => {
       setValue("receiverShopId", shop.shopId ?? "");
       setValue("region", shop.region ?? "");
       setValue("shopName", shop.shopName ?? "");
@@ -81,6 +162,16 @@ const OrderForm = ({
   const onSubmit = (data: OrderFormValue) => {
     if (isViewMode) return;
     console.log("폼 제출:", data);
+    const payload = toOrderCreateRequest(data);
+    createOrder(payload)
+      .then((response) => {
+        alert("주문이 성공적으로 생성되었습니다.");
+        // 추가 처리 로직 (예: 리다이렉트)
+      })
+      .catch((error) => {
+        alert("주문 생성 중 오류가 발생했습니다.");
+        console.error("주문 생성 오류:", error);
+      });
   };
 
   useEffect(() => {
