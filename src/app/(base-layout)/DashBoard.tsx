@@ -230,7 +230,7 @@ const Dashboard = () => {
           </a>
         </div>
 
-        {/* 미배송 수주 */}
+        {/* 당월 총 발주 금액 */}
         <div className="sf-card hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
@@ -250,12 +250,17 @@ const Dashboard = () => {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-800">
-                {dashboardInfo.unconfirmedOrders || 0}
+                {/* 당월 발주 금액 총합 */}
+                {`₩ ${formatCurrency(
+                  (dashboardInfo.monthlyPurchaseTotal ??
+                    dashboardInfo.totalPurchases ??
+                    0) as number
+                )}`}
               </div>
-              <div className="text-sm text-gray-500">건</div>
+              <div className="text-sm text-gray-500">원</div>
             </div>
           </div>
-          <h3 className="font-semibold text-gray-800 mb-2">미배송 수주</h3>
+          <h3 className="font-semibold text-gray-800 mb-2">당월 총 발주 금액</h3>
           <a
             href="/all-received-orders"
             className="inline-flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-md hover:shadow-lg"
@@ -277,7 +282,7 @@ const Dashboard = () => {
           </a>
         </div>
 
-        {/* 총 매출 */}
+        {/* 당월 총 수주 금액 */}
         <div className="sf-card hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
@@ -297,12 +302,16 @@ const Dashboard = () => {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-800">
-                {formatCurrency(dashboardInfo.totalSales || 0)}
+                {`₩ ${formatCurrency(
+                  (dashboardInfo.monthlySalesTotal ??
+                    dashboardInfo.totalSales ??
+                    0) as number
+                )}`}
               </div>
               <div className="text-sm text-gray-500">원</div>
             </div>
           </div>
-          <h3 className="font-semibold text-gray-800 mb-2">이번 달 매출</h3>
+          <h3 className="font-semibold text-gray-800 mb-2">당월 총 수주 금액</h3>
           <a
             href="/settlement-detail"
             className="inline-flex items-center bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg"

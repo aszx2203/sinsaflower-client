@@ -36,9 +36,10 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
   /* 우편번호 모달 */
   const openPostModal = (
     e: React.MouseEvent<HTMLButtonElement>,
-    type: AddressVariant
+    _type: AddressVariant
   ) => {
     e.preventDefault();
+    void _type;
     //setSelectedTarget(type);
     setShowPostModal(true);
   };
@@ -48,7 +49,19 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
   };
 
   /* 우편번호 콜백 */
-  const handleComplete = async (data: any) => {
+  interface PostCodeData {
+    address?: string;
+    addressType?: "R" | "J" | string;
+    bname?: string;
+    buildingName?: string;
+    zonecode?: string;
+    sido?: string;
+    sigungu?: string;
+    roadAddress?: string;
+    jibunAddress?: string;
+  }
+
+  const handleComplete = async (data: PostCodeData) => {
     console.log(data, data);
     const {
       address,
@@ -63,7 +76,7 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
     } = data;
 
     // 기본 주소는 선택 유형에 따라 도로명/지번을 사용
-    let base = address || roadAddress || jibunAddress || "";
+    const base = address || roadAddress || jibunAddress || "";
     let extraAddress = "";
 
     // 도로명 주소 선택 시만 추가 상세 구성 (법정동/건물명)
@@ -89,6 +102,10 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
   };
 
   /* 가입신청 클릭 핸들러 */
+  interface HttpError {
+    response?: { data?: { message?: string; details?: string } };
+  }
+
   const onSubmit = async (formData: RegisterFormInputs) => {
     if (
       !formData.loginId ||
@@ -115,10 +132,11 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
         "회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.";
       alert(message);
       nextStep();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("회원가입 오류:", error);
       alert(
-        error.response?.data?.message || "회원가입 중 오류가 발생했습니다."
+        (error as HttpError)?.response?.data?.message ||
+          "회원가입 중 오류가 발생했습니다."
       );
     }
   };
@@ -433,11 +451,14 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
           <Controller
             control={control}
             name="businessCertFile"
+            rules={{ required: "사업자등록증을 업로드하세요." }}
             render={({ field }) => (
               <FormInput
                 type="file"
                 label="사업자등록증"
+                isRequired={true}
                 accept="image/*"
+                error={errors.businessCertFile?.message}
                 onChange={(e) => {
                   const file = e.target.files?.[0] ?? null;
                   field.onChange(file);
@@ -494,10 +515,13 @@ const RegisterForm = ({ prevStep, nextStep }: RegisterFormProps) => {
           <Controller
             control={control}
             name="bankCertFile"
+            rules={{ required: "통장 사본을 업로드하세요." }}
             render={({ field }) => (
               <FormInput
                 type="file"
                 label="통장 사본"
+                isRequired={true}
+                error={errors.bankCertFile?.message}
                 onChange={(e) => {
                   const file = e.target.files?.[0] ?? null;
                   field.onChange(file);
