@@ -1,9 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 // import { useRouter } from "next/navigation";
 import { useAuth } from "@/shared/context/auth.context";
 
-const PRODUCT_KEYS = ["화환", "근조", "꽃다발", "동양란", "서양란", "관엽식물"] as const;
+const PRODUCT_KEYS = [
+  "축하",
+  "근조",
+  "오브제",
+  "동양",
+  "서양",
+  "꽃",
+  "관엽",
+  "쌀",
+  "기타",
+  "과일",
+] as const;
 type ProductKey = typeof PRODUCT_KEYS[number];
 
 const Dashboard = () => {
@@ -13,14 +24,19 @@ const Dashboard = () => {
   // router not used in this view currently
   const [loading] = useState(false);
   const [error] = useState("");
-  const [disabledProducts, setDisabledProducts] = useState<Record<ProductKey, boolean>>({
-    화환: false,
-    근조: false,
-    꽃다발: false,
-    동양란: false,
-    서양란: false,
-    관엽식물: false,
-  });
+  const defaultDisabledProducts = useMemo<Record<ProductKey, boolean>>(
+    () =>
+      PRODUCT_KEYS.reduce(
+        (acc, k) => {
+          acc[k] = false;
+          return acc;
+        },
+        {} as Record<ProductKey, boolean>
+      ),
+    []
+  );
+
+  const [disabledProducts, setDisabledProducts] = useState<Record<ProductKey, boolean>>(defaultDisabledProducts);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   const [waitTimer, setWaitTimer] = useState<null | number>(null);
@@ -37,14 +53,14 @@ const Dashboard = () => {
       const raw = typeof window !== "undefined" ? localStorage.getItem("sf_unhandled_products") : null;
       if (raw) {
         const parsed = JSON.parse(raw);
-        const next: Record<ProductKey, boolean> = { 화환: false, 근조: false, 꽃다발: false, 동양란: false, 서양란: false, 관엽식물: false };
+        const next: Record<ProductKey, boolean> = { ...defaultDisabledProducts };
         PRODUCT_KEYS.forEach((k) => {
           if (typeof parsed?.[k] === "boolean") next[k] = parsed[k];
         });
         setDisabledProducts(next);
       }
     } catch {}
-  }, []);
+  }, [defaultDisabledProducts]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("ko-KR").format(amount);
@@ -414,18 +430,25 @@ const Dashboard = () => {
               </div>
               <h4 className="font-semibold text-gray-800">미취급상품 설정</h4>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {PRODUCT_KEYS.map((label) => (
-                <label key={label} className="flex items-center p-2 bg-white/60 rounded-lg hover:bg-white/80 transition-colors duration-200 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={!!disabledProducts[label]}
-                    onChange={(e) => setDisabledProducts((prev) => ({ ...prev, [label]: e.target.checked }))}
-                    className="mr-2 h-4 w-4 text-purple-600 rounded focus:ring-purple-500"
-                  />
-                  {label}
-                </label>
-              ))}
+            <div className="text-sm">
+              <div className="flex items-center bg-white/60 border border-purple-100 rounded-xl p-2">
+                <div className="w-10 md:w-12 text-gray-700 font-medium mr-2">상품</div>
+                <div className="flex flex-wrap gap-x-2 gap-y-1 leading-tight">
+                  {PRODUCT_KEYS.map((label) => (
+                    <label key={label} className="flex items-center px-1 py-0.5 rounded hover:bg-white/70 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!disabledProducts[label]}
+                        onChange={(e) =>
+                          setDisabledProducts((prev) => ({ ...prev, [label]: e.target.checked }))
+                        }
+                        className="mr-1 h-4 w-4 text-purple-600 rounded focus:ring-purple-500"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="mt-3 flex items-center gap-2">
               <button
