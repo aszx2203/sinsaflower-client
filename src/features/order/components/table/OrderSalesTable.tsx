@@ -12,7 +12,7 @@ const dummyData: OrderPurchaseValue[] = [
   //다 똑같은데 Response에 발주화원 필요함
   {
     orderNumber: "877915",
-    orderType: "직",
+    orderType: "선택발주",
     orderDate: "25-07-22",
     orderTime: "18:43",
     deliveryDate: "25-07-31",

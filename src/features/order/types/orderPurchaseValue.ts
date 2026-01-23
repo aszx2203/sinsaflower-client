@@ -1,6 +1,6 @@
 export type OrderPurchaseValue = {
   orderNumber: string; //주문번호
-  orderType: string; //구분(직/본)
+  orderType: string; //구분(회원 선택/지역 자동 배정)
   orderDate: string; //주문접수일
   orderTime: string; //주문접수시각
   deliveryDate: string; //배송요구일

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Modal from "@/shared/components/ui/Modal";
 
 type IncomingOrder = {
   orderNumber: string;
@@ -14,6 +15,9 @@ type IncomingOrder = {
 export default function HeaderWaitIndicator() {
   const [isWaiting, setIsWaiting] = useState(false);
   const [order, setOrder] = useState<IncomingOrder | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const formatCurrency = (n: number) => new Intl.NumberFormat("ko-KR").format(n ?? 0);
 
   useEffect(() => {
     const onWaitStart = () => setIsWaiting(true);
@@ -22,6 +26,7 @@ export default function HeaderWaitIndicator() {
       const ce = e as CustomEvent<IncomingOrder>;
       setIsWaiting(false);
       setOrder(ce.detail || null);
+      setShowPopup(true);
     };
     const onOrderClear = () => setOrder(null);
 
@@ -43,12 +48,14 @@ export default function HeaderWaitIndicator() {
       window.dispatchEvent(new CustomEvent("sf_order_accept", { detail: order }));
     }
     window.dispatchEvent(new CustomEvent("sf_order_clear"));
+    setShowPopup(false);
   };
   const reject = () => {
     if (order) {
       window.dispatchEvent(new CustomEvent("sf_order_reject", { detail: order }));
     }
     window.dispatchEvent(new CustomEvent("sf_order_clear"));
+    setShowPopup(false);
   };
 
   if (!isWaiting && !order) return null;
@@ -66,26 +73,55 @@ export default function HeaderWaitIndicator() {
             대기 취소
           </button>
         </div>
-      ) : order ? (
-        <div className="flex items-center gap-3 px-3 py-1 rounded-full bg-amber-50 border border-amber-200">
-          <span className="text-xs font-semibold text-amber-700">자동 배정 주문 도착</span>
-          <span className="text-xs text-gray-700">#{order.orderNumber}</span>
-          <span className="text-xs text-gray-600">{order.region}</span>
-          <span className="text-xs text-gray-600">{order.productType}</span>
-          <button
-            className="text-xs px-2 py-1 bg-primary text-white rounded hover:bg-primary/90"
-            onClick={accept}
-          >
-            승락
-          </button>
-          <button
-            className="text-xs px-2 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-            onClick={reject}
-          >
-            거절
-          </button>
-        </div>
       ) : null}
+
+      {/* 주문 도착 팝업 */}
+      <Modal
+        isOpen={!!order && showPopup}
+        title="자동 배정 주문 도착"
+        hasFooter={false}
+        size="lg"
+        onCancel={() => setShowPopup(false)}
+      >
+        {order && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="text-gray-500">주문번호</div>
+              <div className="col-span-2 font-medium">#{order.orderNumber}</div>
+              <div className="text-gray-500">지역</div>
+              <div className="col-span-2">{order.region}</div>
+              <div className="text-gray-500">배달일</div>
+              <div className="col-span-2">{order.deliveryDate}</div>
+              <div className="text-gray-500">상품</div>
+              <div className="col-span-2">{order.productType}</div>
+              <div className="text-gray-500">금액</div>
+              <div className="col-span-2">₩ {formatCurrency(order.basePrice)}</div>
+              <div className="text-gray-500">메모</div>
+              <div className="col-span-2 whitespace-pre-wrap text-gray-700">{order.notes || "-"}</div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                className="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90"
+                onClick={accept}
+              >
+                승락
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
+                onClick={reject}
+              >
+                거절
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-white border border-gray-300 hover:bg-gray-50"
+                onClick={() => setShowPopup(false)}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

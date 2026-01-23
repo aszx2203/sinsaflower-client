@@ -102,7 +102,7 @@ const dummyData: OrderPurchaseValue[] = [
   },
   {
     orderNumber: "877919",
-    orderType: "본",
+    orderType: "지역 선택",
     orderDate: "25-07-22",
     orderTime: "18:43",
     deliveryDate: "25-07-31",
